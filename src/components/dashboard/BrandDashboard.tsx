@@ -13,7 +13,6 @@ export const BrandDashboard: React.FC = () => {
     const { user } = useAuth();
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [applications, setApplications] = useState<CampaignApplication[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
@@ -27,8 +26,8 @@ export const BrandDashboard: React.FC = () => {
                     campaignData.map(c => applicationService.getByCampaignId(c.id))
                 );
                 setApplications(allApps.flat());
-            } finally {
-                setIsLoading(false);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
             }
         };
         loadData();
@@ -178,8 +177,8 @@ export const BrandDashboard: React.FC = () => {
                                         </td>
                                         <td className="py-3">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${app.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                                    app.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                                        'bg-yellow-100 text-yellow-700'
+                                                app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                                    'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {app.status}
                                             </span>

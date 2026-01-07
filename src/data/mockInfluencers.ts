@@ -1,7 +1,5 @@
 import { Influencer, InfluencerNiche } from '../types/influencer';
 
-const kenyanCities = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Nyeri'];
-
 const generateSocialStats = (baseFollowers: number) => {
     const platforms = ['instagram', 'tiktok', 'youtube', 'twitter'] as const;
     return platforms.slice(0, Math.floor(Math.random() * 3) + 2).map(platform => ({

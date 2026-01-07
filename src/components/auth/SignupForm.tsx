@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { UserRole } from '../../types/auth';
 
 // Validation schema
 const signupSchema = z
@@ -215,8 +214,8 @@ export const SignupForm: React.FC = () => {
                             type="text"
                             autoComplete="name"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.name
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="John Doe"
                         />
@@ -236,8 +235,8 @@ export const SignupForm: React.FC = () => {
                             type="email"
                             autoComplete="email"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.email
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="you@example.com"
                         />
@@ -257,8 +256,8 @@ export const SignupForm: React.FC = () => {
                             type="password"
                             autoComplete="new-password"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.password
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="••••••••"
                         />
@@ -297,8 +296,8 @@ export const SignupForm: React.FC = () => {
                             type="password"
                             autoComplete="new-password"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.confirmPassword
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="••••••••"
                         />

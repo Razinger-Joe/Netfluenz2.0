@@ -12,7 +12,6 @@ export const Messages: React.FC = () => {
         conversations,
         currentConversation,
         messages,
-        isLoading,
         isSending,
         typingUsers,
         selectConversation,

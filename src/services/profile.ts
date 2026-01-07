@@ -1,5 +1,3 @@
-import { Influencer } from '../types/influencer';
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export interface UserProfile {

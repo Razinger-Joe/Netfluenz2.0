@@ -12,7 +12,6 @@ export const InfluencerDashboard: React.FC = () => {
     const { user } = useAuth();
     const [activeCampaigns, setActiveCampaigns] = useState<Campaign[]>([]);
     const [applications, setApplications] = useState<CampaignApplication[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
@@ -24,8 +23,8 @@ export const InfluencerDashboard: React.FC = () => {
                 ]);
                 setActiveCampaigns(campaigns.slice(0, 3));
                 setApplications(apps);
-            } finally {
-                setIsLoading(false);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
             }
         };
         loadData();
@@ -132,8 +131,8 @@ export const InfluencerDashboard: React.FC = () => {
                                     <p className="text-sm text-gray-500">Proposed: KES {app.proposedRate.toLocaleString()}</p>
                                 </div>
                                 <span className={`px-3 py-1 text-xs font-medium rounded-full capitalize ${app.status === 'accepted' ? 'bg-green-100 text-green-700' :
-                                        app.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                            'bg-yellow-100 text-yellow-700'
+                                    app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        'bg-yellow-100 text-yellow-700'
                                     }`}>
                                     {app.status}
                                 </span>

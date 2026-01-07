@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminService, AdminUser } from '../../services/admin';
-import { Search, MoreVertical, Check, X } from 'lucide-react';
+import { Search, Check, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export const UserManagement: React.FC = () => {
@@ -14,12 +14,18 @@ export const UserManagement: React.FC = () => {
             try {
                 const data = await adminService.getAllUsers();
                 setUsers(data);
+            } catch (error) {
+                console.error('Failed to load users:', error);
             } finally {
                 setIsLoading(false);
             }
         };
         loadUsers();
     }, []);
+
+    if (isLoading) {
+        return <div className="p-8 text-center">Loading users...</div>;
+    }
 
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) ||

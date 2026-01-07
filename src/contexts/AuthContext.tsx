@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { AuthContextType, AuthState, LoginData, SignupData, User } from '../types/auth';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { LoginData, SignupData, AuthContextType, AuthState } from '../types/auth';
 import { authService } from '../services/auth';
 
 const initialState: AuthState = {

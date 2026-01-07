@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 // Layout
@@ -13,6 +13,7 @@ import { Login } from './pages/Auth/Login';
 import { Signup } from './pages/Auth/Signup';
 import { Pricing } from './pages/Pricing';
 import { InfluencerMarketplace } from './pages/InfluencerMarketplace';
+import { InfluencerOnboarding } from './pages/InfluencerOnboarding';
 
 // Protected Pages
 import { Dashboard } from './pages/Dashboard';
@@ -57,6 +58,7 @@ function App() {
                     <Route path="/marketplace" element={<InfluencerMarketplace />} />
                     <Route path="/campaigns" element={<Campaigns />} />
                     <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/onboarding" element={<InfluencerOnboarding />} />
                 </Route>
 
                 {/* Auth Routes (no header/footer) */}

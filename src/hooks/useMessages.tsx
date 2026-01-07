@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Message, Conversation, SendMessageData } from '../types/message';
+import { Message, Conversation } from '../types/message';
 import { messageService } from '../services/messages';
 import { useAuth } from './useAuth';
 
