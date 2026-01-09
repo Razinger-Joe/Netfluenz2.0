@@ -5,9 +5,19 @@ import { EarningsChart } from '../../components/charts/EarningsChart';
 import { EngagementChart } from '../../components/charts/EngagementChart';
 import { Users, Target, DollarSign, TrendingUp } from 'lucide-react';
 
+
+interface AnalyticsRevenue {
+    date: string;
+    amount: number;
+}
+
+interface AnalyticsData {
+    revenue: AnalyticsRevenue[];
+}
+
 export const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState<PlatformStats | null>(null);
-    const [analytics, setAnalytics] = useState<any>(null);
+    const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -30,7 +40,7 @@ export const AdminDashboard: React.FC = () => {
         return <div className="p-6">Loading...</div>;
     }
 
-    const revenueData = analytics?.revenue?.slice(-7).map((d: any) => ({
+    const revenueData = analytics?.revenue?.slice(-7).map((d) => ({
         date: d.date,
         earnings: d.amount,
     })) || [];

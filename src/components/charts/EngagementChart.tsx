@@ -28,7 +28,7 @@ export const EngagementChart: React.FC<EngagementChartProps> = ({
     showLegend = true,
     horizontal = false,
 }) => {
-    const CustomTooltip = ({ active, payload }: any) => {
+    const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; fill: string; payload: { name: string } }> }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">

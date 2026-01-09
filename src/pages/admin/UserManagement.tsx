@@ -60,7 +60,7 @@ export const UserManagement: React.FC = () => {
                 </div>
                 <select
                     value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value as any)}
+                    onChange={(e) => setRoleFilter(e.target.value as 'all' | 'influencer' | 'brand')}
                     className="px-4 py-2 border border-gray-200 rounded-lg"
                 >
                     <option value="all">All Roles</option>

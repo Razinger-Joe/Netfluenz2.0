@@ -35,14 +35,14 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({
         return value.toString();
     };
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string; color: string }>; label?: string }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
                     <p className="text-sm font-medium text-gray-900">{label}</p>
-                    {payload.map((entry: any, index: number) => (
+                    {payload.map((entry, index) => (
                         <p key={index} className="text-sm" style={{ color: entry.color }}>
-                            {entry.name}: {currency} {entry.value.toLocaleString()}
+                            {entry.name}: {currency} {Number(entry.value).toLocaleString()}
                         </p>
                     ))}
                 </div>

@@ -66,7 +66,7 @@ export const InfluencerMarketplace: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <select
                                     value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value as any)}
+                                    onChange={(e) => setSortBy(e.target.value as 'followers' | 'engagement' | 'rate' | 'rating' | 'campaigns')}
                                     className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
                                 >
                                     <option value="followers">Followers</option>

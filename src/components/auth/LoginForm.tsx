@@ -25,7 +25,7 @@ export const LoginForm: React.FC = () => {
     const { login, clearError, error: authError } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const from = (location.state as any)?.from?.pathname || '/dashboard';
+    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
     const {
         register,
@@ -104,8 +104,8 @@ export const LoginForm: React.FC = () => {
                             type="email"
                             autoComplete="email"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.email
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="you@example.com"
                         />
@@ -125,8 +125,8 @@ export const LoginForm: React.FC = () => {
                             type="password"
                             autoComplete="current-password"
                             className={`w-full px-4 py-3 rounded-lg border ${errors.password
-                                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                                    : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
                                 } focus:ring-2 focus:outline-none transition-colors`}
                             placeholder="••••••••"
                         />
