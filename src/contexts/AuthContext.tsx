@@ -9,6 +9,7 @@ const initialState: AuthState = {
     error: null,
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {

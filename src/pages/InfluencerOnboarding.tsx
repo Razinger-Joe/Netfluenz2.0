@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Instagram, Youtube, Twitter, Facebook, X, Check } from "lucide-react";
+import { Instagram, Youtube, Twitter, Facebook, X, Check, Music2 } from "lucide-react";
 import { toast } from "sonner";
 
 const NICHES = [
@@ -16,7 +16,7 @@ const NICHES = [
 
 const PLATFORMS = [
     { name: "Instagram", icon: Instagram, color: "text-pink-600" },
-    { name: "TikTok", icon: Twitter, color: "text-black" }, // Using Twitter icon for TikTok temporarily if needed, or update if available
+    { name: "TikTok", icon: Music2, color: "text-black" }, // Using Music2 for TikTok
     { name: "YouTube", icon: Youtube, color: "text-red-600" },
     { name: "Twitter", icon: Twitter, color: "text-blue-500" },
     { name: "Facebook", icon: Facebook, color: "text-blue-600" },
@@ -28,6 +28,7 @@ export const InfluencerOnboarding = () => {
     const [selectedNiches, setSelectedNiches] = useState<string[]>([]);
     const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
     const [platformData, setPlatformData] = useState<Record<string, { username: string; followers: string }>>({});
+    const [agreed, setAgreed] = useState(false);
 
     const progress = (step / 3) * 100;
 
@@ -71,6 +72,11 @@ export const InfluencerOnboarding = () => {
         }
         if (step === 2 && selectedPlatforms.length === 0) {
             toast.error("Please select at least one platform");
+            return;
+        }
+
+        if (step === 3 && !agreed) {
+            toast.error("You must agree to the Terms of Service");
             return;
         }
 
@@ -234,7 +240,12 @@ export const InfluencerOnboarding = () => {
 
                                 <div className="p-4 border-2 border-primary/20 bg-primary/5 rounded-lg">
                                     <label className="flex items-start gap-3 cursor-pointer">
-                                        <input type="checkbox" className="mt-1 rounded border-border" required />
+                                        <input
+                                            type="checkbox"
+                                            className="mt-1 rounded border-border"
+                                            checked={agreed}
+                                            onChange={(e) => setAgreed(e.target.checked)}
+                                        />
                                         <span className="text-sm">
                                             I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and confirm that all provided information is accurate
                                         </span>
