@@ -5,7 +5,6 @@ import { EarningsChart } from '../../components/charts/EarningsChart';
 import { EngagementChart } from '../../components/charts/EngagementChart';
 import { Users, Target, DollarSign, TrendingUp } from 'lucide-react';
 
-
 interface AnalyticsRevenue {
     date: string;
     amount: number;
@@ -37,7 +36,14 @@ export const AdminDashboard: React.FC = () => {
     }, []);
 
     if (isLoading || !stats) {
-        return <div className="p-6">Loading...</div>;
+        return (
+            <div className="p-6 flex items-center justify-center min-h-[60vh]">
+                <div className="text-center">
+                    <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+                    <p className="mt-4 text-muted-foreground text-sm">Loading dashboard...</p>
+                </div>
+            </div>
+        );
     }
 
     const revenueData = analytics?.revenue?.slice(-7).map((d) => ({
@@ -51,14 +57,15 @@ export const AdminDashboard: React.FC = () => {
     ];
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 gradient-mesh min-h-screen">
+            {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-500 mt-1">Platform overview and metrics</p>
+                <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
+                <p className="text-muted-foreground mt-1">Platform overview and metrics</p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
                 <StatCard
                     title="Total Users"
                     value={stats.totalUsers}
@@ -85,29 +92,29 @@ export const AdminDashboard: React.FC = () => {
 
             {/* Charts */}
             <div className="grid lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue (Last 7 Days)</h3>
+                <div className="glass-card rounded-2xl p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Revenue (Last 7 Days)</h3>
                     <EarningsChart data={revenueData} />
                 </div>
-                <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">User Distribution</h3>
+                <div className="glass-card rounded-2xl p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">User Distribution</h3>
                     <EngagementChart data={userDistribution} />
                 </div>
             </div>
 
             {/* Quick Stats */}
             <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Completed Campaigns</h4>
-                    <p className="text-3xl font-bold text-gray-900">{stats.completedCampaigns}</p>
+                <div className="glass-card-hover rounded-2xl p-6">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Completed Campaigns</h4>
+                    <p className="text-3xl font-bold text-foreground">{stats.completedCampaigns}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Total Influencers</h4>
-                    <p className="text-3xl font-bold text-gray-900">{stats.totalInfluencers}</p>
+                <div className="glass-card-hover rounded-2xl p-6">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Total Influencers</h4>
+                    <p className="text-3xl font-bold text-foreground">{stats.totalInfluencers}</p>
                 </div>
-                <div className="bg-white rounded-xl border border-gray-100 p-6">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Total Brands</h4>
-                    <p className="text-3xl font-bold text-gray-900">{stats.totalBrands}</p>
+                <div className="glass-card-hover rounded-2xl p-6">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Total Brands</h4>
+                    <p className="text-3xl font-bold text-foreground">{stats.totalBrands}</p>
                 </div>
             </div>
         </div>
