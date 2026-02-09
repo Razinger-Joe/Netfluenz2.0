@@ -6,6 +6,7 @@ const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    isApproved: false,
     error: null,
 };
 
@@ -28,6 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     user,
                     isAuthenticated: !!user,
                     isLoading: false,
+                    isApproved: user?.isApproved ?? false,
                     error: null,
                 });
             } catch (error) {
@@ -55,6 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 user,
                 isAuthenticated: true,
                 isLoading: false,
+                isApproved: user.isApproved ?? false,
                 error: null,
             });
         } catch (error) {
@@ -81,6 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 user,
                 isAuthenticated: true,
                 isLoading: false,
+                isApproved: user.isApproved ?? false,
                 error: null,
             });
         } catch (error) {
@@ -104,6 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 user: null,
                 isAuthenticated: false,
                 isLoading: false,
+                isApproved: false,
                 error: null,
             });
         } catch (error) {

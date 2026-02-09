@@ -6,6 +6,7 @@ export interface User {
   name: string;
   role: UserRole;
   avatar?: string;
+  isApproved?: boolean;
   createdAt: Date;
 }
 
@@ -13,6 +14,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isApproved: boolean;
   error: string | null;
 }
 
