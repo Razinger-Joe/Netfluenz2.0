@@ -14,30 +14,22 @@ import { Signup } from './pages/Auth/Signup';
 import { Pricing } from './pages/Pricing';
 import { InfluencerMarketplace } from './pages/InfluencerMarketplace';
 import { InfluencerOnboarding } from './pages/InfluencerOnboarding';
+import { Campaigns } from './pages/Campaigns';
 
 // Protected Pages
 import { Dashboard } from './pages/Dashboard';
 import { Messages } from './pages/Messages';
+import { Profile } from './pages/Profile';
+import { Settings } from './pages/Settings';
+import { CreateCampaign } from './pages/CreateCampaign';
+import { CampaignDetails } from './pages/CampaignDetails';
 
 // Admin Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UserManagement } from './pages/admin/UserManagement';
 
-// Placeholder pages
-const Campaigns = () => <div className="p-8">Campaigns - Coming Soon</div>;
-const Profile = () => <div className="p-8">Profile - Coming Soon</div>;
-const Settings = () => <div className="p-8">Settings - Coming Soon</div>;
-const CreateCampaign = () => <div className="p-8">Create Campaign - Coming Soon</div>;
-const CampaignDetails = () => <div className="p-8">Campaign Details - Coming Soon</div>;
-const NotFound = () => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-            <h1 className="text-6xl font-bold text-gray-200 mb-4">404</h1>
-            <p className="text-xl text-gray-600 mb-4">Page not found</p>
-            <a href="/" className="text-orange-600 hover:text-orange-700">Go home →</a>
-        </div>
-    </div>
-);
+// Error Pages
+import { NotFound } from './pages/NotFound';
 
 // Admin Layout wrapper
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (

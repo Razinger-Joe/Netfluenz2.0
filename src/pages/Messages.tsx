@@ -3,8 +3,7 @@ import { useMessages } from '../hooks/useMessages';
 import { useAuth } from '../hooks/useAuth';
 import { ConversationList } from '../components/messages/ConversationList';
 import { ChatWindow } from '../components/messages/ChatWindow';
-import { EmptyState } from '../components/common/EmptyState';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Sparkles } from 'lucide-react';
 
 export const Messages: React.FC = () => {
     const { user } = useAuth();
@@ -31,11 +30,14 @@ export const Messages: React.FC = () => {
     const recipient = getRecipient();
 
     return (
-        <div className="h-[calc(100vh-64px)] flex">
+        <div className="h-[calc(100vh-64px)] flex gradient-mesh">
             {/* Conversation List */}
-            <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
-                <div className="p-4 border-b border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+            <div className="w-80 border-r border-border/50 glass-panel flex flex-col flex-shrink-0">
+                <div className="p-4 border-b border-border/50">
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-lg font-bold text-foreground">Messages</h2>
+                        <Sparkles className="w-4 h-4 text-secondary animate-twinkle" />
+                    </div>
                 </div>
                 <ConversationList
                     conversations={conversations}
@@ -49,7 +51,7 @@ export const Messages: React.FC = () => {
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 bg-white">
+            <div className="flex-1">
                 {currentConversation && recipient ? (
                     <ChatWindow
                         messages={messages}
@@ -64,12 +66,15 @@ export const Messages: React.FC = () => {
                         onStopTyping={stopTyping}
                     />
                 ) : (
-                    <EmptyState
-                        icon={<MessageSquare className="w-full h-full" />}
-                        title="Select a conversation"
-                        description="Choose a conversation from the list to start messaging"
-                        className="h-full"
-                    />
+                    <div className="h-full flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl glass-card flex items-center justify-center">
+                                <MessageSquare className="w-8 h-8 text-muted-foreground/40" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-foreground mb-1">Select a conversation</h3>
+                            <p className="text-sm text-muted-foreground">Choose a conversation from the list to start messaging</p>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

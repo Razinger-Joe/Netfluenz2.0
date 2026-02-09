@@ -5,7 +5,7 @@ import { SearchBar } from '../components/search/SearchBar';
 import { InfluencerFiltersComponent } from '../components/filters/InfluencerFilters';
 import { CardSkeleton } from '../components/common/Skeleton';
 import { EmptyState } from '../components/common/EmptyState';
-import { Users, ArrowUpDown } from 'lucide-react';
+import { Users, ArrowUpDown, Sparkles } from 'lucide-react';
 
 export const InfluencerMarketplace: React.FC = () => {
     const {
@@ -23,23 +23,33 @@ export const InfluencerMarketplace: React.FC = () => {
     } = useInfluencerSearch();
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen gradient-mesh">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-orange-500 to-yellow-500 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                        Discover Influencers
+            <div className="relative overflow-hidden py-14 px-4">
+                {/* Floating orbs */}
+                <div className="absolute w-64 h-64 rounded-full bg-primary/10 blur-3xl -top-16 -right-16 animate-float" />
+                <div className="absolute w-48 h-48 rounded-full bg-secondary/10 blur-3xl bottom-0 left-10 animate-float" style={{ animationDelay: '3s' }} />
+
+                <div className="max-w-7xl mx-auto text-center relative z-10">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                        <Sparkles className="w-5 h-5 text-secondary animate-twinkle" />
+                        <span className="text-sm font-semibold text-primary tracking-wide uppercase">Marketplace</span>
+                    </div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+                        Discover <span className="text-transparent bg-clip-text gradient-hero">Top Influencers</span>
                     </h1>
-                    <p className="text-lg text-white/90 mb-6">
+                    <p className="text-muted-foreground max-w-xl mx-auto mb-8">
                         Find the perfect creators for your brand campaigns
                     </p>
-                    <SearchBar
-                        value={filters.search}
-                        onChange={(value) => setFilters({ search: value })}
-                        suggestions={searchSuggestions}
-                        placeholder="Search by name, niche, or keyword..."
-                        className="max-w-2xl"
-                    />
+                    <div className="max-w-2xl mx-auto">
+                        <SearchBar
+                            value={filters.search}
+                            onChange={(value) => setFilters({ search: value })}
+                            suggestions={searchSuggestions}
+                            placeholder="Search by name, niche, or keyword..."
+                            className="max-w-2xl"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -48,26 +58,28 @@ export const InfluencerMarketplace: React.FC = () => {
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Sidebar Filters */}
                     <aside className="lg:w-72 flex-shrink-0">
-                        <InfluencerFiltersComponent
-                            filters={filters}
-                            onChange={setFilters}
-                            onReset={resetFilters}
-                        />
+                        <div className="glass-card rounded-2xl p-1">
+                            <InfluencerFiltersComponent
+                                filters={filters}
+                                onChange={setFilters}
+                                onReset={resetFilters}
+                            />
+                        </div>
                     </aside>
 
                     {/* Main Content */}
                     <main className="flex-1">
                         {/* Results Header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <p className="text-gray-600">
-                                <span className="font-semibold text-gray-900">{totalResults}</span> influencers found
+                        <div className="flex items-center justify-between mb-6 glass-card rounded-xl p-3">
+                            <p className="text-sm text-muted-foreground">
+                                <span className="font-bold text-foreground">{totalResults}</span> influencers found
                             </p>
 
                             <div className="flex items-center gap-2">
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as 'followers' | 'engagement' | 'rate' | 'rating' | 'campaigns')}
-                                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500"
+                                    className="px-3 py-1.5 glass-input rounded-lg text-sm focus:outline-none"
                                 >
                                     <option value="followers">Followers</option>
                                     <option value="engagement">Engagement</option>
@@ -77,10 +89,10 @@ export const InfluencerMarketplace: React.FC = () => {
                                 </select>
                                 <button
                                     onClick={toggleSortDirection}
-                                    className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="p-2 glass-card rounded-lg hover:bg-muted/50 transition-colors"
                                     title={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
                                 >
-                                    <ArrowUpDown className={`w-4 h-4 text-gray-500 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                                    <ArrowUpDown className={`w-4 h-4 text-muted-foreground ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                                 </button>
                             </div>
                         </div>
