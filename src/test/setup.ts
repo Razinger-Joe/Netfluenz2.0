@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // Cleanup after each test
 afterEach(() => {
@@ -29,4 +29,23 @@ Object.defineProperty(window, 'matchMedia', {
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
     })),
+});
+
+// Mock scrollTo
+window.scrollTo = vi.fn() as any;
+
+// Mock IntersectionObserver
+class MockIntersectionObserver {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+    constructor() { }
+}
+global.IntersectionObserver = MockIntersectionObserver as any;
+
+// Mock clipboard API
+Object.assign(navigator, {
+    clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+    },
 });

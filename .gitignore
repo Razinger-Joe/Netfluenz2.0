@@ -12,6 +12,25 @@ dist
 dist-ssr
 *.local
 
+# Environment
+.env
+.env.test
+.env.local
+
+# Python
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+env/
+
+# Testing reports
+reports/
+playwright-report/
+test-results/
+coverage/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
