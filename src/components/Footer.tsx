@@ -55,7 +55,7 @@ export const Footer: React.FC = () => {
     ];
 
     return (
-        <footer className="glass-footer relative overflow-hidden">
+        <footer className="relative overflow-hidden bg-[#060612] border-t border-white/[0.06]">
             {/* Gradient mesh background */}
             <div className="absolute inset-0 gradient-mesh opacity-50" />
 
@@ -64,10 +64,10 @@ export const Footer: React.FC = () => {
                     {/* Brand */}
                     <div className="md:col-span-1">
                         <div className="flex items-center gap-2.5 mb-4">
-                            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-400 rounded-xl flex items-center justify-center shadow-md">
+                            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-amber-400 rounded-xl flex items-center justify-center shadow-md shadow-orange-500/20">
                                 <span className="text-white font-extrabold text-lg">N</span>
                             </div>
-                            <span className="text-xl font-bold text-gradient">Netfluenz</span>
+                            <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-400">Netfluenz</span>
                         </div>
                         <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
                             Connecting brands with influential content creators across Kenya and beyond.
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
                                 <li key={link.to}>
                                     <Link
                                         to={link.to}
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
+                                        className="text-sm text-white/40 hover:text-orange-400 transition-colors duration-300"
                                     >
                                         {link.label}
                                     </Link>
@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
                                 <li key={link.to}>
                                     <Link
                                         to={link.to}
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
+                                        className="text-sm text-white/40 hover:text-orange-400 transition-colors duration-300"
                                     >
                                         {link.label}
                                     </Link>
@@ -117,7 +117,7 @@ export const Footer: React.FC = () => {
                                 <li key={link.to}>
                                     <Link
                                         to={link.to}
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
+                                        className="text-sm text-white/40 hover:text-orange-400 transition-colors duration-300"
                                     >
                                         {link.label}
                                     </Link>
@@ -127,7 +127,7 @@ export const Footer: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="mt-12 pt-8 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-muted-foreground">
                         © {currentYear} Netfluenz. All rights reserved. Made in Kenya 🇰🇪
                     </p>
@@ -136,7 +136,7 @@ export const Footer: React.FC = () => {
                             <a
                                 key={social.label}
                                 href={social.href}
-                                className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110"
+                                className="text-white/30 hover:text-orange-400 transition-all duration-300 hover:scale-110"
                                 aria-label={social.label}
                             >
                                 {social.icon}

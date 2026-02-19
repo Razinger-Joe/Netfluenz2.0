@@ -11,6 +11,14 @@ export const Header: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+    const [scrolled, setScrolled] = React.useState(false);
+    const isLanding = location.pathname === '/';
+
+    React.useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     const navLinks = [
         { href: '/', label: 'Home' },
@@ -20,15 +28,22 @@ export const Header: React.FC = () => {
     ];
 
     return (
-        <header className="sticky top-0 z-50 glass-nav">
+        <header
+            className={cn(
+                "sticky top-0 z-50 transition-all duration-300",
+                isLanding && !scrolled
+                    ? "bg-transparent"
+                    : "bg-[#0A0A1A]/80 backdrop-blur-xl border-b border-white/[0.06]"
+            )}
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2.5 group">
-                        <div className="w-9 h-9 bg-gradient-to-br from-orange-500 via-orange-400 to-yellow-400 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                        <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-amber-400 rounded-xl flex items-center justify-center shadow-md shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-all duration-300 group-hover:scale-105">
                             <span className="text-white font-extrabold text-lg">N</span>
                         </div>
-                        <span className="text-xl font-bold text-gradient">Netfluenz</span>
+                        <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-400">Netfluenz</span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -40,8 +55,8 @@ export const Header: React.FC = () => {
                                 className={cn(
                                     'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300',
                                     location.pathname === href
-                                        ? 'text-primary bg-primary/10 shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                        ? 'text-orange-400 bg-orange-500/10'
+                                        : 'text-white/60 hover:text-white hover:bg-white/[0.06]'
                                 )}
                             >
                                 {label}
@@ -123,13 +138,13 @@ export const Header: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <Link
                                     to="/login"
-                                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
                                 >
                                     Sign in
                                 </Link>
                                 <Link
                                     to="/signup"
-                                    className="px-5 py-2 text-sm font-semibold text-white gradient-hero rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
+                                    className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300 hover:-translate-y-0.5"
                                 >
                                     Get Started
                                 </Link>
@@ -139,7 +154,7 @@ export const Header: React.FC = () => {
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden p-2 rounded-xl hover:bg-muted/50 transition-colors"
+                            className="md:hidden p-2 rounded-xl text-white hover:bg-white/[0.06] transition-colors"
                         >
                             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </button>
@@ -148,7 +163,7 @@ export const Header: React.FC = () => {
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className="md:hidden py-4 border-t border-border/50 animate-slide-up">
+                    <div className="md:hidden py-4 border-t border-white/[0.06] animate-slide-up bg-[#0A0A1A]/95 backdrop-blur-xl">
                         <nav className="flex flex-col gap-1">
                             {navLinks.map(({ href, label }) => (
                                 <Link
@@ -157,8 +172,8 @@ export const Header: React.FC = () => {
                                     className={cn(
                                         'px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300',
                                         location.pathname === href
-                                            ? 'bg-primary/10 text-primary'
-                                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                            ? 'bg-orange-500/10 text-orange-400'
+                                            : 'text-white/60 hover:bg-white/[0.06] hover:text-white'
                                     )}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
