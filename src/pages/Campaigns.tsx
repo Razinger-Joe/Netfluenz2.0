@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import {
     Search, Plus, Target, Calendar, DollarSign, Users,
-    Clock, CheckCircle, XCircle, TrendingUp
+    Clock, CheckCircle, XCircle, TrendingUp, BarChart3, Eye
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -152,14 +152,74 @@ export const Campaigns: React.FC = () => {
                         <h1 className="text-2xl font-bold text-foreground">Campaigns</h1>
                         <p className="text-muted-foreground mt-1">Discover and manage influencer campaigns</p>
                     </div>
-                    {user && (user.role === 'brand' || user.role === 'admin') && (
+                    <div className="flex items-center gap-3">
                         <button
-                            onClick={() => navigate('/campaigns/create')}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white gradient-hero rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                            onClick={() => navigate('/analytics')}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground glass-card-hover rounded-xl transition-all duration-300"
                         >
-                            <Plus className="w-4 h-4" /> Create Campaign
+                            <BarChart3 className="w-4 h-4 text-orange-500" /> View Analytics
                         </button>
-                    )}
+                        {user && (user.role === 'brand' || user.role === 'admin') && (
+                            <button
+                                onClick={() => navigate('/campaigns/create')}
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white gradient-hero rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                            >
+                                <Plus className="w-4 h-4" /> Create Campaign
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Campaign Stats Summary */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/10">
+                                <Target className="w-5 h-5 text-orange-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-foreground">{MOCK_CAMPAIGNS.length}</p>
+                                <p className="text-xs text-muted-foreground">Total Campaigns</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/10">
+                                <CheckCircle className="w-5 h-5 text-green-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {MOCK_CAMPAIGNS.filter(c => c.status === 'active').length}
+                                </p>
+                                <p className="text-xs text-muted-foreground">Active Now</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10">
+                                <Eye className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-foreground">
+                                    {MOCK_CAMPAIGNS.reduce((sum, c) => sum + c.applicants, 0)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">Total Applicants</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="glass-card rounded-2xl p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/10">
+                                <TrendingUp className="w-5 h-5 text-purple-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-foreground">342%</p>
+                                <p className="text-xs text-muted-foreground">Avg ROI</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Filters */}

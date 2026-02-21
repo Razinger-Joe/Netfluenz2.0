@@ -50,6 +50,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/marketplace" element={<InfluencerMarketplace />} />
                     <Route path="/campaigns" element={<Campaigns />} />
+                    <Route path="/analytics" element={<Analytics />} />
                     <Route path="/pricing" element={<Pricing />} />
                     <Route path="/onboarding" element={<InfluencerOnboarding />} />
                 </Route>
@@ -105,14 +106,6 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <CampaignDetails />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/analytics"
-                        element={
-                            <ProtectedRoute>
-                                <Analytics />
                             </ProtectedRoute>
                         }
                     />
