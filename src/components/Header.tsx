@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { NotificationBell } from './notifications/NotificationBell';
-import { Menu, X, LogOut, User, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, LayoutDashboard, ChevronDown, BarChart3 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
@@ -103,6 +103,14 @@ export const Header: React.FC = () => {
                                             >
                                                 <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
                                                 Dashboard
+                                            </DropdownMenu.Item>
+
+                                            <DropdownMenu.Item
+                                                className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground rounded-lg cursor-pointer outline-none hover:bg-muted/60 transition-colors"
+                                                onSelect={() => navigate('/analytics')}
+                                            >
+                                                <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                                                Analytics
                                             </DropdownMenu.Item>
 
                                             <DropdownMenu.Item

@@ -23,6 +23,7 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { CreateCampaign } from './pages/CreateCampaign';
 import { CampaignDetails } from './pages/CampaignDetails';
+import { Analytics } from './pages/Analytics';
 
 // Admin Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -104,6 +105,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <CampaignDetails />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/analytics"
+                        element={
+                            <ProtectedRoute>
+                                <Analytics />
                             </ProtectedRoute>
                         }
                     />

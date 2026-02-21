@@ -4,11 +4,12 @@ import { useAuth } from '../hooks/useAuth';
 import {
     ArrowLeft, Calendar, DollarSign, Users, MapPin, Target,
     CheckCircle, Send, Star, TrendingUp, Eye, MessageSquare,
-    Instagram, Youtube, Twitter, Share2
+    Instagram, Youtube, Twitter, Share2, BarChart3
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
 import * as Tabs from '@radix-ui/react-tabs';
+import { CampaignAnalytics } from '../components/campaign/CampaignAnalytics';
 
 // Mock campaign data
 const CAMPAIGNS_DATA: Record<string, any> = {
@@ -147,6 +148,15 @@ export const CampaignDetails: React.FC = () => {
                                 >
                                     Applicants ({campaign.applicants})
                                 </Tabs.Trigger>
+                                {(user?.role === 'brand' || user?.role === 'admin') && (
+                                    <Tabs.Trigger
+                                        value="analytics"
+                                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex items-center gap-1.5"
+                                    >
+                                        <BarChart3 className="w-3.5 h-3.5" />
+                                        Analytics
+                                    </Tabs.Trigger>
+                                )}
                             </Tabs.List>
 
                             <Tabs.Content value="details" className="space-y-4">
@@ -252,6 +262,17 @@ export const CampaignDetails: React.FC = () => {
                                     ))}
                                 </div>
                             </Tabs.Content>
+
+                            {(user?.role === 'brand' || user?.role === 'admin') && (
+                                <Tabs.Content value="analytics">
+                                    <div className="glass-card rounded-2xl p-6">
+                                        <CampaignAnalytics
+                                            campaignId={id}
+                                            campaignTitle={campaign.title}
+                                        />
+                                    </div>
+                                </Tabs.Content>
+                            )}
                         </Tabs.Root>
                     </div>
 
