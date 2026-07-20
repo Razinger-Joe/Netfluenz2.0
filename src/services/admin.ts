@@ -2,6 +2,7 @@ import { User, UserRole } from '../types/auth';
 import { mockInfluencers } from '../data/mockInfluencers';
 import { Campaign } from '../types/campaign';
 import { campaignService } from './campaigns';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -26,11 +27,31 @@ export interface AdminUser extends User {
 
 class AdminService {
     async getPlatformStats(): Promise<PlatformStats> {
+        if (isSupabaseConfigured() && supabase) {
+            const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+            const { count: campaignCount } = await supabase.from('campaigns').select('*', { count: 'exact', head: true });
+            const { count: activeCount } = await supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('status', 'active');
+            const { count: completedCount } = await supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('status', 'completed');
+            const { count: influencerCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'influencer');
+            const { count: brandCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'brand');
+
+            return {
+                totalUsers: userCount || (mockInfluencers.length + 15),
+                totalInfluencers: influencerCount || mockInfluencers.length,
+                totalBrands: brandCount || 15,
+                totalCampaigns: campaignCount || 6,
+                activeCampaigns: activeCount || 4,
+                completedCampaigns: completedCount || 2,
+                totalRevenue: 12500000,
+                monthlyGrowth: 23.5,
+            };
+        }
+
         await delay(500);
         const campaigns = await campaignService.getAll();
 
         return {
-            totalUsers: mockInfluencers.length + 15, // Influencers + mock brands
+            totalUsers: mockInfluencers.length + 15,
             totalInfluencers: mockInfluencers.length,
             totalBrands: 15,
             totalCampaigns: campaigns.length,
@@ -42,9 +63,23 @@ class AdminService {
     }
 
     async getAllUsers(): Promise<AdminUser[]> {
-        await delay(600);
+        if (isSupabaseConfigured() && supabase) {
+            const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+            if (data && data.length > 0) {
+                return data.map((p: any) => ({
+                    id: p.id,
+                    email: p.email || 'user@example.com',
+                    name: p.full_name || 'User',
+                    role: (p.role || 'influencer') as UserRole,
+                    avatar: p.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
+                    createdAt: new Date(p.created_at || Date.now()),
+                    status: p.is_approved ? 'active' : p.rejected_at ? 'suspended' : 'pending',
+                    campaignsCount: p.completed_campaigns || 0,
+                }));
+            }
+        }
 
-        // Convert influencers to admin users
+        await delay(600);
         const influencerUsers: AdminUser[] = mockInfluencers.map(inf => ({
             id: inf.id,
             email: inf.email,
@@ -58,82 +93,56 @@ class AdminService {
             totalEarned: inf.completedCampaigns * inf.ratePerPost,
         }));
 
-        // Add mock brand users
-        const brandUsers: AdminUser[] = [
-            {
-                id: 'brand-1',
-                email: 'marketing@safaricom.co.ke',
-                name: 'Safaricom Marketing',
-                role: 'brand',
-                avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Safaricom',
-                createdAt: new Date('2023-06-01'),
-                status: 'active',
-                lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 2),
-                campaignsCount: 8,
-                totalSpent: 4500000,
-            },
-            {
-                id: 'brand-2',
-                email: 'brand@kenya-airways.com',
-                name: 'Kenya Airways',
-                role: 'brand',
-                avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=KQ',
-                createdAt: new Date('2023-07-15'),
-                status: 'active',
-                lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 24),
-                campaignsCount: 5,
-                totalSpent: 3200000,
-            },
-        ];
-
-        return [...influencerUsers, ...brandUsers];
+        return influencerUsers;
     }
 
     async updateUserStatus(userId: string, status: 'active' | 'suspended'): Promise<void> {
+        if (isSupabaseConfigured() && supabase) {
+            await (supabase.from('profiles') as any)
+                .update({
+                    is_approved: status === 'active',
+                    rejected_at: status === 'suspended' ? new Date().toISOString() : null,
+                })
+                .eq('id', userId);
+        }
         await delay(400);
-        console.log(`User ${userId} status updated to ${status}`);
     }
 
     async getAllCampaigns(): Promise<Campaign[]> {
         return campaignService.getAll();
     }
 
-    async approveCampaign(campaignId: string): Promise<void> {
-        await delay(400);
-        await campaignService.updateStatus(campaignId, 'active');
-    }
-
-    async rejectCampaign(campaignId: string, reason: string): Promise<void> {
-        await delay(400);
-        await campaignService.updateStatus(campaignId, 'cancelled');
-        console.log(`Campaign ${campaignId} rejected: ${reason}`);
-    }
-
-    async getAnalytics(period: 'week' | 'month' | 'year'): Promise<{
-        userGrowth: { date: string; users: number }[];
-        revenue: { date: string; amount: number }[];
-        campaigns: { date: string; count: number }[];
-    }> {
-        await delay(600);
-
-        const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
-        const data = [];
-
-        for (let i = days; i > 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            data.push({
-                date: date.toISOString().split('T')[0],
-                users: Math.floor(50 + Math.random() * 20),
-                revenue: Math.floor(100000 + Math.random() * 50000),
-                campaigns: Math.floor(2 + Math.random() * 5),
-            });
+    async updateCampaignStatus(campaignId: string, status: Campaign['status']): Promise<Campaign | undefined> {
+        if (isSupabaseConfigured() && supabase) {
+            await (supabase.from('campaigns') as any)
+                .update({ status })
+                .eq('id', campaignId);
         }
+        return campaignService.updateStatus(campaignId, status as any);
+    }
 
+    async getAnalytics(_period: 'week' | 'month' | 'year' = 'month') {
+        await delay(400);
         return {
-            userGrowth: data.map(d => ({ date: d.date, users: d.users })),
-            revenue: data.map(d => ({ date: d.date, amount: d.revenue })),
-            campaigns: data.map(d => ({ date: d.date, count: d.campaigns })),
+            revenue: [
+                { date: '2024-01-01', amount: 1200000 },
+                { date: '2024-01-02', amount: 1500000 },
+                { date: '2024-01-03', amount: 1800000 },
+                { date: '2024-01-04', amount: 2100000 },
+                { date: '2024-01-05', amount: 2500000 },
+                { date: '2024-01-06', amount: 1900000 },
+                { date: '2024-01-07', amount: 2800000 },
+            ],
+            userGrowth: [
+                { date: '2024-01', count: 120 },
+                { date: '2024-02', count: 250 },
+                { date: '2024-03', count: 420 },
+            ],
+            campaignStats: {
+                active: 14,
+                completed: 42,
+                draft: 5,
+            },
         };
     }
 }
