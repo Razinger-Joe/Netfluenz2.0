@@ -1,45 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import { profileService, PortfolioItem } from '../services/profile';
 import {
     User, Mail, MapPin, Calendar, Camera, Edit2, Save, X,
     Instagram, Youtube, Twitter, Globe, LinkIcon, Star,
-    TrendingUp, Users, Target, Award
+    TrendingUp, Users, Target
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const Profile: React.FC = () => {
-    const { user } = useAuth();
+    const { user, updateProfile: updateAuthUser } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
+    const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
     const [formData, setFormData] = useState({
-        name: user?.name || '',
-        bio: 'Passionate content creator focused on lifestyle, tech, and African culture. Helping brands tell authentic stories. 🌍',
-        location: 'Nairobi, Kenya',
-        website: 'https://example.com',
+        name: '',
+        bio: '',
+        location: '',
+        website: '',
         instagram: '@netfluenz',
         youtube: 'Netfluenz',
         twitter: '@netfluenz',
     });
 
+    useEffect(() => {
+        if (!user) return;
+        let isMounted = true;
+
+        Promise.all([
+            profileService.getProfile(user.id),
+            profileService.getPortfolio(user.id),
+        ]).then(([prof, port]) => {
+            if (isMounted) {
+                setPortfolioItems(port);
+                setFormData({
+                    name: prof.name || user.name || '',
+                    bio: prof.bio || 'Passionate content creator focused on lifestyle, tech, and African culture.',
+                    location: prof.location || 'Nairobi, Kenya',
+                    website: prof.website || 'https://netfluenz.com',
+                    instagram: '@netfluenz',
+                    youtube: 'Netfluenz',
+                    twitter: '@netfluenz',
+                });
+            }
+        });
+
+        return () => { isMounted = false; };
+    }, [user]);
+
     if (!user) return <Navigate to="/login" replace />;
 
     const stats = [
-        { label: 'Followers', value: '125K', icon: Users, color: 'from-orange-500 to-amber-400' },
-        { label: 'Engagement', value: '4.8%', icon: TrendingUp, color: 'from-teal-500 to-cyan-400' },
+        { label: 'Followers', value: '125K', icon: Users, color: 'from-pink-500 to-rose-400' },
+        { label: 'Engagement', value: '4.8%', icon: TrendingUp, color: 'from-green-500 to-emerald-400' },
         { label: 'Campaigns', value: '24', icon: Target, color: 'from-violet-500 to-purple-400' },
-        { label: 'Rating', value: '4.9', icon: Star, color: 'from-yellow-500 to-orange-400' },
+        { label: 'Rating', value: '4.9', icon: Star, color: 'from-amber-400 to-yellow-500' },
     ];
 
-    const portfolio = [
-        { id: 1, brand: 'Safaricom', title: 'Digital Kenya Campaign', reach: '500K', type: 'Instagram' },
-        { id: 2, brand: 'JKUAT', title: 'University Life Series', reach: '200K', type: 'YouTube' },
-        { id: 3, brand: 'Tusker', title: 'Celebrate Local Culture', reach: '350K', type: 'TikTok' },
-        { id: 4, brand: 'Equity Bank', title: 'Financial Literacy', reach: '180K', type: 'Twitter' },
-    ];
-
-    const handleSave = () => {
-        setIsEditing(false);
-        toast.success('Profile updated successfully!');
+    const handleSave = async () => {
+        try {
+            await profileService.updateProfile(user.id, {
+                name: formData.name,
+                bio: formData.bio,
+                location: formData.location,
+                website: formData.website,
+            });
+            if (updateAuthUser) {
+                await updateAuthUser({ name: formData.name });
+            }
+            setIsEditing(false);
+            toast.success('Profile updated successfully!');
+        } catch (err: any) {
+            toast.error('Failed to update profile');
+        }
     };
 
     const handleCancel = () => {
@@ -196,7 +229,7 @@ export const Profile: React.FC = () => {
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4">
-                        {portfolio.map((item) => (
+                        {portfolioItems.map((item) => (
                             <div
                                 key={item.id}
                                 className="glass-card-hover rounded-xl p-4 cursor-pointer"
@@ -205,16 +238,13 @@ export const Profile: React.FC = () => {
                                 <div className="flex items-start justify-between mb-2">
                                     <div>
                                         <p className="font-semibold text-foreground text-sm">{item.title}</p>
-                                        <p className="text-xs text-muted-foreground">{item.brand}</p>
+                                        <p className="text-xs text-muted-foreground">{item.campaignName || 'Campaign'}</p>
                                     </div>
                                     <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
-                                        {item.type}
+                                        Portfolio
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-1 text-sm">
-                                    <Award className="w-3.5 h-3.5 text-secondary" />
-                                    <span className="text-muted-foreground">{item.reach} reach</span>
-                                </div>
+                                <p className="text-xs text-muted-foreground line-clamp-2">{item.description}</p>
                             </div>
                         ))}
                     </div>

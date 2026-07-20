@@ -1,3 +1,5 @@
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export interface UserProfile {
@@ -20,6 +22,14 @@ export interface SocialLink {
     username: string;
     followers?: number;
     verified?: boolean;
+}
+
+export interface PortfolioItem {
+    id: string;
+    title: string;
+    description: string;
+    imageUrl: string;
+    campaignName?: string;
 }
 
 export interface UpdateProfileData {
@@ -56,14 +66,35 @@ class ProfileService {
     }
 
     async getProfile(userId: string): Promise<UserProfile> {
-        await delay(400);
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
 
+            if (!error && data) {
+                return {
+                    id: data.id,
+                    email: data.email || 'user@example.com',
+                    name: data.full_name || 'User',
+                    avatar: data.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+                    bio: data.bio || '',
+                    location: data.location || 'Nairobi, Kenya',
+                    website: data.website || '',
+                    socialLinks: [],
+                    createdAt: new Date(data.created_at || Date.now()),
+                    updatedAt: new Date(data.updated_at || Date.now()),
+                };
+            }
+        }
+
+        await delay(400);
         const stored = this.getStoredProfile();
         if (stored && stored.id === userId) {
             return stored;
         }
 
-        // Return mock profile
         return {
             id: userId,
             email: 'user@example.com',
@@ -78,8 +109,21 @@ class ProfileService {
     }
 
     async updateProfile(userId: string, data: UpdateProfileData): Promise<UserProfile> {
-        await delay(600);
+        if (isSupabaseConfigured() && supabase) {
+            const updatePayload: any = {
+                updated_at: new Date().toISOString(),
+            };
+            if (data.name !== undefined) updatePayload.full_name = data.name;
+            if (data.bio !== undefined) updatePayload.bio = data.bio;
+            if (data.location !== undefined) updatePayload.location = data.location;
+            if (data.website !== undefined) updatePayload.website = data.website;
 
+            await (supabase.from('profiles') as any)
+                .update(updatePayload)
+                .eq('id', userId);
+        }
+
+        await delay(400);
         const currentProfile = await this.getProfile(userId);
         const updatedProfile: UserProfile = {
             ...currentProfile,
@@ -92,61 +136,91 @@ class ProfileService {
     }
 
     async updateAvatar(userId: string, file: File): Promise<string> {
-        await delay(800);
+        await delay(600);
 
-        // In production, this would upload to a CDN
-        // For mock, we'll create a data URL
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = async () => {
-                const avatarUrl = reader.result as string;
-                const profile = await this.getProfile(userId);
-                profile.avatar = avatarUrl;
-                profile.updatedAt = new Date();
-                this.saveProfile(profile);
-                resolve(avatarUrl);
+            reader.onloadend = async () => {
+                const result = reader.result as string;
+                if (isSupabaseConfigured() && supabase) {
+                    await (supabase.from('profiles') as any)
+                        .update({ avatar_url: result })
+                        .eq('id', userId);
+                }
+                resolve(result);
             };
-            reader.onerror = () => reject(new Error('Failed to read file'));
             reader.readAsDataURL(file);
         });
     }
 
-    async connectSocialAccount(
-        userId: string,
-        platform: SocialLink['platform'],
-        username: string,
-        url: string
-    ): Promise<SocialLink> {
-        await delay(1000);
+    async getPortfolio(userId: string): Promise<PortfolioItem[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('user_portfolios')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
 
-        const profile = await this.getProfile(userId);
-        const newLink: SocialLink = {
-            platform,
-            url,
-            username,
-            followers: Math.floor(Math.random() * 100000),
-            verified: Math.random() > 0.5,
-        };
-
-        const existingIndex = profile.socialLinks.findIndex(l => l.platform === platform);
-        if (existingIndex !== -1) {
-            profile.socialLinks[existingIndex] = newLink;
-        } else {
-            profile.socialLinks.push(newLink);
+            if (!error && data) {
+                return data.map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    description: item.description || '',
+                    imageUrl: item.image_url || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80',
+                    campaignName: item.campaign_name,
+                }));
+            }
         }
 
-        profile.updatedAt = new Date();
-        this.saveProfile(profile);
-        return newLink;
+        return [
+            { id: '1', title: 'Safaricom M-Pesa Showcase', description: 'Tech review reel with 150K views', imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80', campaignName: 'Safaricom' },
+            { id: '2', title: 'Tusker Culture Fest', description: 'Cultural storytelling video', imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80', campaignName: 'Tusker' }
+        ];
     }
 
-    async disconnectSocialAccount(userId: string, platform: SocialLink['platform']): Promise<void> {
-        await delay(400);
+    async addPortfolioItem(userId: string, item: Omit<PortfolioItem, 'id'>): Promise<PortfolioItem> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await (supabase.from('user_portfolios') as any)
+                .insert([{
+                    user_id: userId,
+                    title: item.title,
+                    description: item.description,
+                    image_url: item.imageUrl,
+                    campaign_name: item.campaignName,
+                }])
+                .select('*')
+                .single();
 
-        const profile = await this.getProfile(userId);
-        profile.socialLinks = profile.socialLinks.filter(l => l.platform !== platform);
-        profile.updatedAt = new Date();
-        this.saveProfile(profile);
+            if (!error && data) {
+                return {
+                    id: data.id,
+                    title: data.title,
+                    description: data.description || '',
+                    imageUrl: data.image_url || '',
+                    campaignName: data.campaign_name,
+                };
+            }
+        }
+
+        return {
+            id: Math.random().toString(36).substring(7),
+            ...item,
+        };
+    }
+
+    async connectSocialAccount(_userId: string, platform: SocialLink['platform'], username: string, url: string): Promise<SocialLink> {
+        await delay(300);
+        return {
+            platform,
+            username,
+            url,
+            followers: Math.floor(Math.random() * 50000) + 10000,
+            verified: true,
+        };
+    }
+
+    async disconnectSocialAccount(_userId: string, _platform: SocialLink['platform']): Promise<void> {
+        await delay(300);
     }
 }
 
