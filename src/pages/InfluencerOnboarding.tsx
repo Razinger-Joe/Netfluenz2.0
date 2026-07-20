@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Instagram, Youtube, Twitter, Facebook, X, Check, Music2 } from "lucide-react";
 import { toast } from "sonner";
+import { isSupabaseConfigured, supabase } from "../lib/supabaseClient";
 
 const NICHES = [
     "Fashion", "Beauty", "Tech", "Food", "Travel", "Fitness",
@@ -83,8 +84,31 @@ export const InfluencerOnboarding = () => {
         if (step < 3) {
             setStep(step + 1);
         } else {
+            const sb = supabase;
+            if (isSupabaseConfigured() && sb) {
+                sb.auth.getUser().then(({ data: { user } }) => {
+                    if (user) {
+                        const totalFollowers = Object.values(platformData).reduce(
+                            (acc, curr) => acc + (parseInt(curr.followers) || 0),
+                            0
+                        );
+                        (sb.from('profiles') as any)
+                            .update({
+                                niches: selectedNiches,
+                                follower_count: totalFollowers,
+                                platforms: Object.entries(platformData).map(([p, d]) => ({
+                                    platform: p.toLowerCase(),
+                                    followers: parseInt(d.followers) || 0,
+                                    handle: d.username ? `@${d.username}` : '',
+                                })),
+                            })
+                            .eq('id', user.id)
+                            .then(() => {});
+                    }
+                });
+            }
             toast.success("Profile completed! Welcome to Netfluenz 🎉");
-            setTimeout(() => navigate("/dashboard"), 1000); // Updated to /dashboard
+            setTimeout(() => navigate("/dashboard"), 1000);
         }
     };
 

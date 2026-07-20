@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Influencer, InfluencerFilters, DEFAULT_FILTERS } from '../types/influencer';
-import { mockInfluencers } from '../data/mockInfluencers';
+import { influencerService } from '../services/influencer';
 
 type SortOption = 'followers' | 'engagement' | 'rate' | 'rating' | 'campaigns';
 type SortDirection = 'asc' | 'desc';
@@ -20,16 +20,28 @@ interface UseInfluencerSearchReturn {
 }
 
 export const useInfluencerSearch = (): UseInfluencerSearchReturn => {
+    const [rawInfluencers, setRawInfluencers] = useState<Influencer[]>([]);
     const [filters, setFiltersState] = useState<InfluencerFilters>(DEFAULT_FILTERS);
     const [sortBy, setSortBy] = useState<SortOption>('followers');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let isMounted = true;
+        setIsLoading(true);
+        influencerService.getAll().then(data => {
+            if (isMounted) {
+                setRawInfluencers(data);
+                setIsLoading(false);
+            }
+        });
+        return () => { isMounted = false; };
+    }, []);
 
     const setFilters = useCallback((newFilters: Partial<InfluencerFilters>) => {
         setIsLoading(true);
         setFiltersState(prev => ({ ...prev, ...newFilters }));
-        // Simulate loading
-        setTimeout(() => setIsLoading(false), 300);
+        setTimeout(() => setIsLoading(false), 200);
     }, []);
 
     const resetFilters = useCallback(() => {
@@ -41,7 +53,7 @@ export const useInfluencerSearch = (): UseInfluencerSearchReturn => {
     }, []);
 
     const filteredInfluencers = useMemo(() => {
-        let result = [...mockInfluencers];
+        let result = [...rawInfluencers];
 
         // Search filter
         if (filters.search) {
@@ -122,7 +134,7 @@ export const useInfluencerSearch = (): UseInfluencerSearchReturn => {
         const searchLower = filters.search.toLowerCase();
         const suggestions = new Set<string>();
 
-        mockInfluencers.forEach(inf => {
+        rawInfluencers.forEach(inf => {
             if (inf.name.toLowerCase().includes(searchLower)) {
                 suggestions.add(inf.name);
             }
@@ -134,7 +146,7 @@ export const useInfluencerSearch = (): UseInfluencerSearchReturn => {
         });
 
         return Array.from(suggestions).slice(0, 5);
-    }, [filters.search]);
+    }, [filters.search, rawInfluencers]);
 
     return {
         influencers: filteredInfluencers,
