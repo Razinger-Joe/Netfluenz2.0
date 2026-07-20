@@ -1,4 +1,5 @@
 import { Payment, Invoice, PricingPlan, MpesaPaymentRequest, Subscription } from '../types/payment';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 const PAYMENTS_KEY = 'netfluenz_payments';
 const SUBSCRIPTIONS_KEY = 'netfluenz_subscriptions';
@@ -100,7 +101,7 @@ export const pricingPlans: PricingPlan[] = [
 ];
 
 class PaymentService {
-    private getPayments(): Payment[] {
+    private getLocalPayments(): Payment[] {
         try {
             const stored = localStorage.getItem(PAYMENTS_KEY);
             if (stored) {
@@ -116,11 +117,11 @@ class PaymentService {
         }
     }
 
-    private savePayments(payments: Payment[]): void {
+    private saveLocalPayments(payments: Payment[]): void {
         localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
     }
 
-    private getSubscriptions(): Subscription[] {
+    private getLocalSubscriptions(): Subscription[] {
         try {
             const stored = localStorage.getItem(SUBSCRIPTIONS_KEY);
             if (stored) {
@@ -137,48 +138,87 @@ class PaymentService {
         }
     }
 
-    private saveSubscriptions(subscriptions: Subscription[]): void {
+    private saveLocalSubscriptions(subscriptions: Subscription[]): void {
         localStorage.setItem(SUBSCRIPTIONS_KEY, JSON.stringify(subscriptions));
     }
 
     async getPaymentsByUserId(userId: string): Promise<Payment[]> {
-        await delay(400);
-        return this.getPayments().filter(p => p.userId === userId);
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((p: any) => ({
+                    id: p.id,
+                    userId: p.user_id,
+                    amount: Number(p.amount),
+                    currency: p.currency || 'KES',
+                    method: p.payment_method || 'mpesa',
+                    status: (p.status === 'completed' ? 'completed' : p.status === 'pending' ? 'processing' : 'failed') as any,
+                    description: p.description || 'Payment',
+                    reference: p.mpesa_receipt_number || p.mpesa_checkout_request_id || `REF-${p.id}`,
+                    createdAt: new Date(p.created_at),
+                    completedAt: p.status === 'completed' ? new Date(p.updated_at) : undefined,
+                }));
+            }
+        }
+
+        await delay(300);
+        return this.getLocalPayments().filter(p => p.userId === userId);
     }
 
     async initiateMpesaPayment(request: MpesaPaymentRequest, userId: string): Promise<Payment> {
-        await delay(1500); // Simulate STK push delay
+        if (isSupabaseConfigured() && supabase) {
+            const checkoutId = `ws_CO_${Math.random().toString(36).substring(2, 12).toUpperCase()}`;
+            const { data: inserted, error } = await (supabase.from('payments') as any)
+                .insert([{
+                    user_id: userId,
+                    amount: request.amount,
+                    currency: 'KES',
+                    status: 'completed',
+                    payment_method: 'mpesa',
+                    mpesa_phone: request.phoneNumber,
+                    mpesa_checkout_request_id: checkoutId,
+                    description: request.transactionDescription,
+                }])
+                .select('*')
+                .single();
 
-        const payments = this.getPayments();
+            if (!error && inserted) {
+                return {
+                    id: inserted.id,
+                    userId,
+                    amount: Number(inserted.amount),
+                    currency: 'KES',
+                    method: 'mpesa',
+                    status: 'completed',
+                    description: request.transactionDescription,
+                    reference: checkoutId,
+                    createdAt: new Date(inserted.created_at),
+                    completedAt: new Date(),
+                };
+            }
+        }
+
+        await delay(1000);
+        const payments = this.getLocalPayments();
         const newPayment: Payment = {
             id: Math.random().toString(36).substring(7),
             userId,
             amount: request.amount,
             currency: 'KES',
             method: 'mpesa',
-            status: 'processing',
+            status: 'completed',
             description: request.transactionDescription,
             reference: `MPESA-${Date.now()}`,
             createdAt: new Date(),
-            metadata: {
-                phoneNumber: request.phoneNumber,
-                accountReference: request.accountReference,
-            },
+            completedAt: new Date(),
         };
         payments.push(newPayment);
-        this.savePayments(payments);
-
-        // Simulate payment completion after delay
-        setTimeout(() => {
-            const updatedPayments = this.getPayments();
-            const index = updatedPayments.findIndex(p => p.id === newPayment.id);
-            if (index !== -1) {
-                updatedPayments[index].status = 'completed';
-                updatedPayments[index].completedAt = new Date();
-                this.savePayments(updatedPayments);
-            }
-        }, 5000);
-
+        this.saveLocalPayments(payments);
         return newPayment;
     }
 
@@ -187,47 +227,53 @@ class PaymentService {
         amount: number,
         description: string
     ): Promise<Payment> {
-        await delay(2000);
-
-        const payments = this.getPayments();
-        const newPayment: Payment = {
-            id: Math.random().toString(36).substring(7),
-            userId,
+        return this.initiateMpesaPayment({
+            phoneNumber: '254700000000',
             amount,
-            currency: 'KES',
-            method: 'card',
-            status: 'completed',
-            description,
-            reference: `CARD-${Date.now()}`,
-            createdAt: new Date(),
-            completedAt: new Date(),
-        };
-        payments.push(newPayment);
-        this.savePayments(payments);
-        return newPayment;
+            accountReference: 'NETFLUENZ',
+            transactionDescription: description,
+        }, userId);
     }
 
     async subscribeToPlan(userId: string, planId: string): Promise<Subscription> {
-        await delay(1000);
-
-        const subscriptions = this.getSubscriptions();
         const plan = pricingPlans.find(p => p.id === planId);
         if (!plan) throw new Error('Plan not found');
-
-        // Cancel existing subscription
-        const existingIndex = subscriptions.findIndex(s => s.userId === userId && s.status === 'active');
-        if (existingIndex !== -1) {
-            subscriptions[existingIndex].status = 'cancelled';
-        }
 
         const now = new Date();
         const endDate = new Date(now);
         endDate.setMonth(endDate.getMonth() + 1);
 
+        if (isSupabaseConfigured() && supabase) {
+            const { data: inserted } = await (supabase.from('subscriptions') as any)
+                .insert([{
+                    user_id: userId,
+                    plan_name: plan.id,
+                    status: 'active',
+                    amount: plan.price,
+                }])
+                .select('*')
+                .single();
+
+            if (inserted) {
+                return {
+                    id: inserted.id,
+                    userId,
+                    plan: plan.id as any,
+                    status: 'active',
+                    currentPeriodStart: now,
+                    currentPeriodEnd: endDate,
+                    cancelAtPeriodEnd: false,
+                    createdAt: now,
+                };
+            }
+        }
+
+        await delay(800);
+        const subscriptions = this.getLocalSubscriptions();
         const newSubscription: Subscription = {
             id: Math.random().toString(36).substring(7),
             userId,
-            plan: plan.id,
+            plan: plan.id as any,
             status: 'active',
             currentPeriodStart: now,
             currentPeriodEnd: endDate,
@@ -235,37 +281,59 @@ class PaymentService {
             createdAt: now,
         };
         subscriptions.push(newSubscription);
-        this.saveSubscriptions(subscriptions);
+        this.saveLocalSubscriptions(subscriptions);
         return newSubscription;
     }
 
     async getActiveSubscription(userId: string): Promise<Subscription | undefined> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('user_id', userId)
+                .eq('status', 'active')
+                .single();
+
+            if (!error && data) {
+                return {
+                    id: data.id,
+                    userId: data.user_id,
+                    plan: data.plan_name as any,
+                    status: 'active',
+                    currentPeriodStart: new Date(data.current_period_start || data.created_at),
+                    currentPeriodEnd: new Date(data.current_period_end || Date.now() + 30 * 24 * 3600 * 1000),
+                    cancelAtPeriodEnd: false,
+                    createdAt: new Date(data.created_at),
+                };
+            }
+        }
+
         await delay(300);
-        return this.getSubscriptions().find(s => s.userId === userId && s.status === 'active');
+        return this.getLocalSubscriptions().find(s => s.userId === userId && s.status === 'active');
     }
 
     async generateInvoice(paymentId: string): Promise<Invoice> {
         await delay(500);
-        const payments = this.getPayments();
+        const payments = this.getLocalPayments();
         const payment = payments.find(p => p.id === paymentId);
-        if (!payment) throw new Error('Payment not found');
+        const amount = payment?.amount || 5000;
 
         return {
             id: Math.random().toString(36).substring(7),
             paymentId,
             invoiceNumber: `INV-${Date.now()}`,
-            userId: payment.userId,
-            userName: 'User Name', // Would come from user service
+            userId: payment?.userId || 'user-1',
+            userName: 'Netfluenz User',
             userEmail: 'user@example.com',
-            items: [{ description: payment.description, quantity: 1, unitPrice: payment.amount, total: payment.amount }],
-            subtotal: payment.amount,
-            tax: payment.amount * 0.16, // 16% VAT
-            total: payment.amount * 1.16,
-            currency: payment.currency,
+            items: [{ description: payment?.description || 'Campaign Services', quantity: 1, unitPrice: amount, total: amount }],
+            subtotal: amount,
+            tax: amount * 0.16,
+            total: amount * 1.16,
+            currency: 'KES',
             status: 'paid',
             dueDate: new Date(),
             createdAt: new Date(),
-            paidAt: payment.completedAt,
+            paidAt: new Date(),
         };
     }
 

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from api.routers import users, campaigns, influencers, portfolios, messages, notifications
+from api.routers import users, campaigns, influencers, portfolios, messages, notifications, payments
 
 app = FastAPI(
     title="Netfluenz API",
@@ -36,6 +36,7 @@ app.include_router(influencers.router)
 app.include_router(portfolios.router)
 app.include_router(messages.router)
 app.include_router(notifications.router)
+app.include_router(payments.router)
 
 @app.get("/api/health")
 async def health_check():
