@@ -34,8 +34,8 @@ export const CampaignAnalytics: React.FC<CampaignAnalyticsProps> = ({
     ];
 
     const influencerPerformance = [
-        { name: 'Jane Wanjiku', value: 85000, color: '#f97316' },
-        { name: 'David Ochieng', value: 62000, color: '#eab308' },
+        { name: 'Jane Wanjiku', value: 85000, color: '#EC4899' },
+        { name: 'David Ochieng', value: 62000, color: '#39FF14' },
         { name: 'Aisha Mohamed', value: 48000, color: '#22c55e' },
         { name: 'Brian Kimani', value: 35000, color: '#3b82f6' },
         { name: 'Grace Muthoni', value: 28000, color: '#8b5cf6' },
@@ -49,8 +49,8 @@ export const CampaignAnalytics: React.FC<CampaignAnalyticsProps> = ({
     ];
 
     const funnelData = [
-        { name: 'Impressions', value: 850000, color: '#f97316' },
-        { name: 'Reach', value: 540000, color: '#eab308' },
+        { name: 'Impressions', value: 850000, color: '#EC4899' },
+        { name: 'Reach', value: 540000, color: '#39FF14' },
         { name: 'Engagement', value: 125000, color: '#22c55e' },
         { name: 'Clicks', value: 42000, color: '#3b82f6' },
         { name: 'Conversions', value: 6800, color: '#8b5cf6' },
@@ -258,7 +258,7 @@ export const CampaignAnalytics: React.FC<CampaignAnalyticsProps> = ({
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { label: 'Influencer Payments', amount: 'KES 120,000', total: 200000, spent: 120000, color: '#f97316' },
+                                { label: 'Influencer Payments', amount: 'KES 120,000', total: 200000, spent: 120000, color: '#EC4899' },
                                 { label: 'Content Production', amount: 'KES 35,000', total: 50000, spent: 35000, color: '#8b5cf6' },
                                 { label: 'Platform Boost', amount: 'KES 18,000', total: 30000, spent: 18000, color: '#22c55e' },
                                 { label: 'Agency Fee', amount: 'KES 7,000', total: 20000, spent: 7000, color: '#3b82f6' },

@@ -11,9 +11,11 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     isApproved: boolean;
+    error: string | null;
     login: (data: any) => Promise<void>;
     signup: (data: any) => Promise<void>;
     logout: () => Promise<void>;
+    clearError: () => void;
     updateProfile: (data: Partial<User>) => Promise<void>;
 }
 
@@ -21,8 +23,11 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [session, setSession] = useState<Session | null>(null);
+    const [, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const clearError = () => setError(null);
 
     useEffect(() => {
         // 1. Check active session
@@ -135,19 +140,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser({ ...user, ...data });
 
         // Update Supabase 'profiles' table
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                full_name: data.name,
-                avatar_url: data.avatar,
-            })
+        const updateData: any = {
+            full_name: data.name,
+            avatar_url: data.avatar,
+        };
+        const { error } = await (supabase
+            .from('profiles') as any)
+            .update(updateData)
             .eq('id', user.id);
 
         if (error) console.error("Error updating profile:", error);
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, isApproved: true, login, signup, logout, updateProfile }}>
+        <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, isApproved: true, error, login, signup, logout, clearError, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

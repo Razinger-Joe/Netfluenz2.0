@@ -21,7 +21,7 @@ interface EngagementChartProps {
     horizontal?: boolean;
 }
 
-const defaultColors = ['#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+const defaultColors = ['#EC4899', '#39FF14', '#22c55e', '#3b82f6', '#8b5cf6', '#d946ef'];
 
 export const EngagementChart: React.FC<EngagementChartProps> = ({
     data,

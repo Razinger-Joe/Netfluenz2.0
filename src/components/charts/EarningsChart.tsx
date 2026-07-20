@@ -77,10 +77,10 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({
                         type="monotone"
                         dataKey="earnings"
                         name="Earnings"
-                        stroke="#f97316"
+                        stroke="#EC4899"
                         strokeWidth={2}
-                        dot={{ r: 4, fill: '#f97316' }}
-                        activeDot={{ r: 6, fill: '#f97316' }}
+                        dot={{ r: 4, fill: '#EC4899' }}
+                        activeDot={{ r: 6, fill: '#EC4899' }}
                     />
                     {showComparison && (
                         <Line

@@ -62,8 +62,8 @@ export const ContentTypeRadarChart: React.FC<ContentTypeRadarChartProps> = ({
                     <Radar
                         name="Your Performance"
                         dataKey="current"
-                        stroke="#f97316"
-                        fill="#f97316"
+                        stroke="#EC4899"
+                        fill="#EC4899"
                         fillOpacity={0.25}
                         strokeWidth={2}
                         animationDuration={1500}

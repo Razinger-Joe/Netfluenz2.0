@@ -52,7 +52,7 @@ export const AdminDashboard: React.FC = () => {
     })) || [];
 
     const userDistribution = [
-        { name: 'Influencers', value: stats.totalInfluencers, color: '#f97316' },
+        { name: 'Influencers', value: stats.totalInfluencers, color: '#EC4899' },
         { name: 'Brands', value: stats.totalBrands, color: '#3b82f6' },
     ];
 

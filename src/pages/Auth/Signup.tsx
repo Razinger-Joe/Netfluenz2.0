@@ -37,8 +37,8 @@ export const Signup = () => {
             if (authData.user) {
                 // 2. Create Profile entry (if not handled by Database Trigger)
                 // Best practice is to use a Trigger, but we'll do client-side insert for now as a fallback/explicit step
-                const { error: profileError } = await supabase
-                    .from('profiles')
+                const { error: profileError } = await (supabase
+                    .from('profiles') as any)
                     .insert([
                         {
                             id: authData.user.id,

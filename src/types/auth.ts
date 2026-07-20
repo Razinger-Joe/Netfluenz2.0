@@ -8,6 +8,17 @@ export interface User {
   avatar?: string;
   isApproved?: boolean;
   createdAt: Date;
+  bio?: string;
+  location?: string;
+  joinedDate?: string;
+  stats?: {
+    campaignsCompleted: number;
+    activeCampaigns: number;
+    totalEarnings: number;
+    responseRate: number;
+  };
+  socialAccounts?: any[];
+  categories?: string[];
 }
 
 export interface AuthState {

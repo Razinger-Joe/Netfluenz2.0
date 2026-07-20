@@ -46,8 +46,8 @@ const performanceData = [
 ];
 
 const funnelData = [
-    { name: 'Impressions', value: 2500000, color: '#f97316' },
-    { name: 'Reach', value: 1650000, color: '#eab308' },
+    { name: 'Impressions', value: 2500000, color: '#EC4899' },
+    { name: 'Reach', value: 1650000, color: '#39FF14' },
     { name: 'Engagement', value: 385000, color: '#22c55e' },
     { name: 'Clicks', value: 125000, color: '#3b82f6' },
     { name: 'Conversions', value: 18500, color: '#8b5cf6' },
@@ -297,9 +297,9 @@ export const Analytics: React.FC = () => {
                             <EngagementChart
                                 data={[
                                     { name: 'Active', value: 4, color: '#22c55e' },
-                                    { name: 'Draft', value: 2, color: '#eab308' },
+                                    { name: 'Draft', value: 2, color: '#39FF14' },
                                     { name: 'Completed', value: 8, color: '#3b82f6' },
-                                    { name: 'Paused', value: 1, color: '#f97316' },
+                                    { name: 'Paused', value: 1, color: '#EC4899' },
                                 ]}
                             />
                         </div>
@@ -470,8 +470,8 @@ export const Analytics: React.FC = () => {
                             </h3>
                             <EngagementChart
                                 data={[
-                                    { name: '13-17', value: 12000, color: '#f97316' },
-                                    { name: '18-24', value: 89000, color: '#eab308' },
+                                    { name: '13-17', value: 12000, color: '#EC4899' },
+                                    { name: '18-24', value: 89000, color: '#39FF14' },
                                     { name: '25-34', value: 125000, color: '#22c55e' },
                                     { name: '35-44', value: 78000, color: '#3b82f6' },
                                     { name: '45-54', value: 32000, color: '#8b5cf6' },

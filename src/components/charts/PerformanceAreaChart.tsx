@@ -58,8 +58,8 @@ export const PerformanceAreaChart: React.FC<PerformanceAreaChartProps> = ({
                 <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                            <stop offset="5%" stopColor="#EC4899" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#EC4899" stopOpacity={0} />
                         </linearGradient>
                         <linearGradient id="colorReach" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
@@ -89,7 +89,7 @@ export const PerformanceAreaChart: React.FC<PerformanceAreaChartProps> = ({
                         type="monotone"
                         dataKey="impressions"
                         name="Impressions"
-                        stroke="#f97316"
+                        stroke="#EC4899"
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorImpressions)"
