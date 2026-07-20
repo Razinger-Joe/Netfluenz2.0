@@ -25,9 +25,9 @@ export interface Campaign {
     status: CampaignStatus;
     budget: CampaignBudget;
     requirements: CampaignRequirements;
-    startDate: Date;
-    endDate: Date;
-    applicationDeadline: Date;
+    startDate?: Date;
+    endDate?: Date;
+    applicationDeadline?: Date;
     maxInfluencers: number;
     applicationsCount: number;
     acceptedCount: number;
@@ -63,11 +63,11 @@ export interface CampaignApplication {
 export interface CreateCampaignData {
     title: string;
     description: string;
-    budget: number;
-    currency: 'KES' | 'USD';
+    budget: number | CampaignBudget;
+    currency?: 'KES' | 'USD';
     requirements: CampaignRequirements;
-    startDate: Date;
-    endDate: Date;
-    applicationDeadline: Date;
-    maxInfluencers: number;
+    startDate?: Date;
+    endDate?: Date;
+    applicationDeadline?: Date;
+    maxInfluencers?: number;
 }

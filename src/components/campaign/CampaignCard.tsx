@@ -130,11 +130,11 @@ export const CampaignCard: React.FC<CampaignCardProps> = ({
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{format(new Date(campaign.startDate), 'MMM d')} - {format(new Date(campaign.endDate), 'MMM d')}</span>
+                        <span>{campaign.startDate ? format(new Date(campaign.startDate), 'MMM d') : 'Flexible'} - {campaign.endDate ? format(new Date(campaign.endDate), 'MMM d') : 'Flexible'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock className="w-4 h-4 text-gray-400" />
-                        <span>Deadline: {format(new Date(campaign.applicationDeadline), 'MMM d')}</span>
+                        <span>Deadline: {campaign.applicationDeadline ? format(new Date(campaign.applicationDeadline), 'MMM d') : 'Open'}</span>
                     </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { applicationService } from '../services/campaigns';
 import {
     ArrowLeft, Calendar, DollarSign, Users, MapPin, Target,
     CheckCircle, Send, Star, TrendingUp, Eye, MessageSquare,
@@ -66,18 +67,45 @@ export const CampaignDetails: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [hasApplied, setHasApplied] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const campaign = CAMPAIGNS_DATA[id || ''] || { ...DEFAULT_CAMPAIGN, id, title: `Campaign #${id}` };
 
-    const handleApply = () => {
-        setHasApplied(true);
-        toast.success('Application submitted!', {
-            description: 'The brand will review your profile and respond within 48 hours.',
-        });
+    const handleApply = async () => {
+        if (!user) {
+            toast.error('Please log in to apply');
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            await applicationService.submit(
+                id || '1',
+                user.id,
+                user.name || 'Influencer',
+                user.avatar || '',
+                'Excited to collaborate on this campaign!',
+                50000
+            );
+            setHasApplied(true);
+            toast.success('Application submitted!', {
+                description: 'The brand will review your profile and respond within 48 hours.',
+            });
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to submit application');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleApplicantAction = (_applicantId: string, action: 'accept' | 'reject') => {
-        toast.success(`Applicant ${action === 'accept' ? 'accepted' : 'rejected'}!`);
+    const handleApplicantAction = async (applicantId: string, action: 'accept' | 'reject') => {
+        try {
+            await applicationService.updateStatus(applicantId, action === 'accept' ? 'accepted' : 'rejected');
+            toast.success(`Applicant ${action === 'accept' ? 'accepted' : 'rejected'}!`);
+        } catch (err: any) {
+            toast.error('Failed to update application status');
+        }
     };
 
     return (
@@ -287,17 +315,19 @@ export const CampaignDetails: React.FC = () => {
 
                             {user?.role === 'influencer' || !user ? (
                                 <button
-                                    onClick={hasApplied ? undefined : handleApply}
-                                    disabled={hasApplied}
+                                    onClick={hasApplied || isSubmitting ? undefined : handleApply}
+                                    disabled={hasApplied || isSubmitting}
                                     className={cn(
                                         'w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300',
                                         hasApplied
                                             ? 'bg-green-100 text-green-700 cursor-default'
-                                            : 'text-white gradient-hero hover:shadow-lg hover:-translate-y-0.5'
+                                            : 'text-white gradient-hero hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50'
                                     )}
                                 >
                                     {hasApplied ? (
                                         <span className="flex items-center justify-center gap-2"><CheckCircle className="w-4 h-4" /> Applied</span>
+                                    ) : isSubmitting ? (
+                                        <span className="flex items-center justify-center gap-2">Submitting...</span>
                                     ) : (
                                         <span className="flex items-center justify-center gap-2"><Send className="w-4 h-4" /> Apply Now</span>
                                     )}

@@ -1,9 +1,10 @@
-import { Campaign, CampaignApplication, CreateCampaignData, CampaignStatus } from '../types/campaign';
+import { Campaign, CampaignApplication, CreateCampaignData, CampaignStatus, CampaignBudget } from '../types/campaign';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 
 const CAMPAIGNS_KEY = 'netfluenz_campaigns';
 const APPLICATIONS_KEY = 'netfluenz_applications';
 
-// Mock campaigns data
+// Mock campaigns data for offline / unconfigured demo mode
 const initialCampaigns: Campaign[] = [
     {
         id: '1',
@@ -99,9 +100,9 @@ const initialCampaigns: Campaign[] = [
             impressions: 4500000,
             reach: 3200000,
             engagement: 6.8,
-            clicks: 156000,
-            conversions: 12500,
-            roi: 420,
+            clicks: 120000,
+            conversions: 8500,
+            roi: 340,
         },
     },
     {
@@ -110,24 +111,24 @@ const initialCampaigns: Campaign[] = [
         brandName: 'Tusker Brewery',
         brandLogo: 'https://api.dicebear.com/7.x/initials/svg?seed=Tusker',
         title: 'Responsible Drinking Campaign',
-        description: 'Entertainment influencers for responsible drinking awareness.',
+        description: 'Promote responsible drinking and celebrate Kenyan culture with Tusker.',
         status: 'draft',
         budget: { total: 1000000, spent: 0, currency: 'KES' },
         requirements: {
-            minFollowers: 200000,
-            niches: ['entertainment', 'lifestyle'],
-            platforms: ['instagram', 'youtube', 'tiktok'],
-            contentType: 'video',
-            deliverables: ['1 YouTube video', '3 Instagram Reels', '5 TikToks'],
+            minFollowers: 50000,
+            niches: ['lifestyle', 'entertainment'],
+            platforms: ['instagram', 'twitter'],
+            contentType: 'post',
+            deliverables: ['4 Posts', '8 Stories'],
         },
         startDate: new Date('2024-03-01'),
-        endDate: new Date('2024-04-30'),
+        endDate: new Date('2024-04-15'),
         applicationDeadline: new Date('2024-02-20'),
-        maxInfluencers: 8,
+        maxInfluencers: 15,
         applicationsCount: 0,
         acceptedCount: 0,
-        createdAt: new Date('2024-01-10'),
-        updatedAt: new Date('2024-01-10'),
+        createdAt: new Date('2024-01-05'),
+        updatedAt: new Date('2024-01-05'),
     },
 ];
 
@@ -138,12 +139,11 @@ class CampaignService {
         try {
             const stored = localStorage.getItem(CAMPAIGNS_KEY);
             if (stored) {
-                const campaigns = JSON.parse(stored);
-                return campaigns.map((c: Campaign) => ({
+                return JSON.parse(stored).map((c: Campaign) => ({
                     ...c,
-                    startDate: new Date(c.startDate),
-                    endDate: new Date(c.endDate),
-                    applicationDeadline: new Date(c.applicationDeadline),
+                    startDate: c.startDate ? new Date(c.startDate) : undefined,
+                    endDate: c.endDate ? new Date(c.endDate) : undefined,
+                    applicationDeadline: c.applicationDeadline ? new Date(c.applicationDeadline) : undefined,
                     createdAt: new Date(c.createdAt),
                     updatedAt: new Date(c.updatedAt),
                 }));
@@ -160,26 +160,101 @@ class CampaignService {
     }
 
     async getAll(): Promise<Campaign[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((c: any) => this.mapDbToCampaign(c));
+            }
+        }
+
         await delay(500);
         return this.getCampaigns();
     }
 
     async getById(id: string): Promise<Campaign | undefined> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .eq('id', id)
+                .single();
+
+            if (!error && data) {
+                return this.mapDbToCampaign(data);
+            }
+        }
+
         await delay(300);
         return this.getCampaigns().find(c => c.id === id);
     }
 
     async getByBrandId(brandId: string): Promise<Campaign[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .eq('brand_id', brandId)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((c: any) => this.mapDbToCampaign(c));
+            }
+        }
+
         await delay(400);
         return this.getCampaigns().filter(c => c.brandId === brandId);
     }
 
     async getByStatus(status: CampaignStatus): Promise<Campaign[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaigns')
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .eq('status', status)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((c: any) => this.mapDbToCampaign(c));
+            }
+        }
+
         await delay(400);
         return this.getCampaigns().filter(c => c.status === status);
     }
 
     async create(data: CreateCampaignData, brandId: string, brandName: string): Promise<Campaign> {
+        const budgetTotal = typeof data.budget === 'number' ? data.budget : (data.budget?.total || 0);
+        const budgetObj: CampaignBudget = typeof data.budget === 'number'
+            ? { total: data.budget, spent: 0, currency: data.currency || 'KES' }
+            : data.budget;
+
+        if (isSupabaseConfigured() && supabase) {
+            const payload = {
+                brand_id: brandId,
+                title: data.title,
+                description: data.description,
+                budget: budgetTotal,
+                status: 'draft',
+                niches: data.requirements?.niches || [],
+                requirements: data.requirements || {},
+                start_date: data.startDate ? new Date(data.startDate).toISOString() : null,
+                end_date: data.endDate ? new Date(data.endDate).toISOString() : null,
+            };
+
+            const { data: created, error } = await (supabase.from('campaigns') as any)
+                .insert([payload])
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .single();
+
+            if (!error && created) {
+                return this.mapDbToCampaign(created);
+            }
+        }
+
         await delay(800);
         const campaigns = this.getCampaigns();
         const newCampaign: Campaign = {
@@ -190,12 +265,12 @@ class CampaignService {
             title: data.title,
             description: data.description,
             status: 'draft',
-            budget: { total: data.budget, spent: 0, currency: data.currency },
+            budget: budgetObj,
             requirements: data.requirements,
-            startDate: data.startDate,
-            endDate: data.endDate,
-            applicationDeadline: data.applicationDeadline,
-            maxInfluencers: data.maxInfluencers,
+            startDate: data.startDate ? new Date(data.startDate) : undefined,
+            endDate: data.endDate ? new Date(data.endDate) : undefined,
+            applicationDeadline: data.applicationDeadline ? new Date(data.applicationDeadline) : undefined,
+            maxInfluencers: data.maxInfluencers || 10,
             applicationsCount: 0,
             acceptedCount: 0,
             createdAt: new Date(),
@@ -207,6 +282,18 @@ class CampaignService {
     }
 
     async updateStatus(id: string, status: CampaignStatus): Promise<Campaign | undefined> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await (supabase.from('campaigns') as any)
+                .update({ status })
+                .eq('id', id)
+                .select('*, profiles!brand_id(full_name, avatar_url)')
+                .single();
+
+            if (!error && data) {
+                return this.mapDbToCampaign(data);
+            }
+        }
+
         await delay(400);
         const campaigns = this.getCampaigns();
         const index = campaigns.findIndex(c => c.id === id);
@@ -220,6 +307,11 @@ class CampaignService {
     }
 
     async delete(id: string): Promise<boolean> {
+        if (isSupabaseConfigured() && supabase) {
+            const { error } = await supabase.from('campaigns').delete().eq('id', id);
+            if (!error) return true;
+        }
+
         await delay(400);
         const campaigns = this.getCampaigns();
         const filtered = campaigns.filter(c => c.id !== id);
@@ -228,6 +320,38 @@ class CampaignService {
             return true;
         }
         return false;
+    }
+
+    private mapDbToCampaign(dbRecord: any): Campaign {
+        const brandProfile = dbRecord.profiles || {};
+        return {
+            id: dbRecord.id,
+            brandId: dbRecord.brand_id,
+            brandName: brandProfile.full_name || 'Brand',
+            brandLogo: brandProfile.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${dbRecord.brand_id}`,
+            title: dbRecord.title,
+            description: dbRecord.description,
+            status: dbRecord.status || 'draft',
+            budget: {
+                total: Number(dbRecord.budget) || 0,
+                spent: 0,
+                currency: 'KES',
+            },
+            requirements: {
+                minFollowers: dbRecord.requirements?.minFollowers || 0,
+                niches: dbRecord.niches || [],
+                platforms: dbRecord.requirements?.platforms || ['instagram'],
+                contentType: dbRecord.requirements?.contentType || 'post',
+                deliverables: dbRecord.requirements?.deliverables || [],
+            },
+            startDate: dbRecord.start_date ? new Date(dbRecord.start_date) : undefined,
+            endDate: dbRecord.end_date ? new Date(dbRecord.end_date) : undefined,
+            maxInfluencers: 10,
+            applicationsCount: 0,
+            acceptedCount: 0,
+            createdAt: new Date(dbRecord.created_at),
+            updatedAt: new Date(dbRecord.updated_at),
+        };
     }
 }
 
@@ -260,6 +384,35 @@ class ApplicationService {
         proposal: string,
         proposedRate: number
     ): Promise<CampaignApplication> {
+        if (isSupabaseConfigured() && supabase) {
+            const payload = {
+                campaign_id: campaignId,
+                influencer_id: influencerId,
+                pitch: proposal,
+                status: 'pending',
+            };
+
+            const { data, error } = await (supabase.from('campaign_applications') as any)
+                .insert([payload])
+                .select('*')
+                .single();
+
+            if (!error && data) {
+                return {
+                    id: data.id,
+                    campaignId: data.campaign_id,
+                    influencerId: data.influencer_id,
+                    influencerName,
+                    influencerAvatar,
+                    status: data.status,
+                    proposedRate,
+                    proposal: data.pitch || proposal,
+                    portfolio: [],
+                    submittedAt: new Date(data.created_at),
+                };
+            }
+        }
+
         await delay(600);
         const applications = this.getApplications();
         const newApp: CampaignApplication = {
@@ -280,11 +433,57 @@ class ApplicationService {
     }
 
     async getByCampaignId(campaignId: string): Promise<CampaignApplication[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaign_applications')
+                .select('*, profiles!influencer_id(full_name, avatar_url)')
+                .eq('campaign_id', campaignId)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((a: any) => ({
+                    id: a.id,
+                    campaignId: a.campaign_id,
+                    influencerId: a.influencer_id,
+                    influencerName: a.profiles?.full_name || 'Influencer',
+                    influencerAvatar: a.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${a.influencer_id}`,
+                    status: a.status,
+                    proposedRate: 0,
+                    proposal: a.pitch || '',
+                    portfolio: [],
+                    submittedAt: new Date(a.created_at),
+                }));
+            }
+        }
+
         await delay(400);
         return this.getApplications().filter(a => a.campaignId === campaignId);
     }
 
     async getByInfluencerId(influencerId: string): Promise<CampaignApplication[]> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await supabase
+                .from('campaign_applications')
+                .select('*, campaigns!campaign_id(title)')
+                .eq('influencer_id', influencerId)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                return data.map((a: any) => ({
+                    id: a.id,
+                    campaignId: a.campaign_id,
+                    influencerId: a.influencer_id,
+                    influencerName: 'Influencer',
+                    influencerAvatar: '',
+                    status: a.status,
+                    proposedRate: 0,
+                    proposal: a.pitch || '',
+                    portfolio: [],
+                    submittedAt: new Date(a.created_at),
+                }));
+            }
+        }
+
         await delay(400);
         return this.getApplications().filter(a => a.influencerId === influencerId);
     }
@@ -294,6 +493,31 @@ class ApplicationService {
         status: 'accepted' | 'rejected',
         notes?: string
     ): Promise<CampaignApplication | undefined> {
+        if (isSupabaseConfigured() && supabase) {
+            const { data, error } = await (supabase.from('campaign_applications') as any)
+                .update({ status })
+                .eq('id', id)
+                .select('*')
+                .single();
+
+            if (!error && data) {
+                return {
+                    id: data.id,
+                    campaignId: data.campaign_id,
+                    influencerId: data.influencer_id,
+                    influencerName: 'Influencer',
+                    influencerAvatar: '',
+                    status: data.status,
+                    proposedRate: 0,
+                    proposal: data.pitch || '',
+                    portfolio: [],
+                    submittedAt: new Date(data.created_at),
+                    reviewedAt: new Date(),
+                    reviewNotes: notes,
+                };
+            }
+        }
+
         await delay(400);
         const applications = this.getApplications();
         const index = applications.findIndex(a => a.id === id);
